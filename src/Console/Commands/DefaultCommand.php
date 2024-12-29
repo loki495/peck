@@ -71,14 +71,14 @@ class DefaultCommand extends Command
         renderUsing($output);
 
         $file = str_replace($currentDirectory, '.', $issue->file);
-        $lineInfo = ($issue->line !== 0) ? " on line <strong>{$issue->line}</strong>" : '';
+        $lineInfo = ($issue->line !== 0) ? ":{$issue->line}" : '';
         $suggestions = implode(', ', $issue->misspelling->suggestions);
 
         render(<<<HTML
             <div class="mx-2 mb-1">
                 <div class="space-x-1">
                     <span class="bg-red text-white px-1 font-bold">ISSUE</span>
-                    <span>Misspelling in <strong><a href="{$issue->file}">{$file}</a></strong>{$lineInfo}: '<strong>{$issue->misspelling->word}</strong>'</span>
+                    <span>Misspelling in <strong><a href="{$issue->file}{$lineInfo}">{$file}{$lineInfo}</a></strong>: '<strong>{$issue->misspelling->word}</strong>'</span>
                 </div>
 
                 <div class="space-x-1 text-gray-700">
