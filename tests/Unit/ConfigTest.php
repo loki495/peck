@@ -10,6 +10,9 @@ it('should have a default configuration', function (): void {
         'aspell',
         'args',
         'namespace',
+        'doc',
+        'bool',
+        'php',
     ])->and($config->whitelistedDirectories)->toBe([]);
 });
 

@@ -4,7 +4,10 @@
             "config",
             "aspell",
             "args",
-            "namespace"
+            "namespace",
+            "doc",
+            "bool",
+            "php"
         ],
         "directories": []
     }

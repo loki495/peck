@@ -17,7 +17,7 @@ use Symfony\Component\Finder\Finder;
 readonly class FileSystemChecker implements Checker
 {
     /**
-     * Creates a new instance of FsChecker.
+     * Creates a new instance of FileSystemChecker.
      */
     public function __construct(
         private Config $config,

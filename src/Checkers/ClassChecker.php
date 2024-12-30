@@ -22,7 +22,7 @@ use Symfony\Component\Finder\SplFileInfo;
 readonly class ClassChecker implements Checker
 {
     /**
-     * Creates a new instance of FsChecker.
+     * Creates a new instance of ClassChecker.
      */
     public function __construct(
         private Config $config,
@@ -84,10 +84,10 @@ readonly class ClassChecker implements Checker
                 ...$this->getPropertyNames($reflectionClass),
             ];
 
-            if ($reflectionClass->getDocComment()) {
+            if ($docComment = $reflectionClass->getDocComment()) {
                 $namesToCheck = [
                     ...$namesToCheck,
-                    ...explode(PHP_EOL, $reflectionClass->getDocComment()),
+                    ...explode(PHP_EOL, $docComment),
                 ];
             }
 
@@ -129,6 +129,13 @@ readonly class ClassChecker implements Checker
                 ...$namesToCheck,
                 ...$this->getMethodParameters($method),
             ];
+
+            if ($docComment = $method->getDocComment()) {
+                $namesToCheck = [
+                    ...$namesToCheck,
+                    ...explode(PHP_EOL, $docComment),
+                ];
+            }
         }
 
         return $namesToCheck ?? [];
@@ -155,10 +162,28 @@ readonly class ClassChecker implements Checker
      */
     private function getPropertyNames(ReflectionClass $class): array
     {
-        return array_map(
+        $properties = $class->getProperties();
+        $propertiesNames = array_map(
             fn (ReflectionProperty $property): string => $property->getName(),
-            $class->getProperties(),
+            $properties,
         );
+
+        $propertiesDocComments = array_reduce(
+            array_map(
+                fn (ReflectionProperty $property): array => explode(PHP_EOL, $property->getDocComment() ?: ''),
+                $properties,
+            ),
+            fn (array $carry, array $item): array => [
+                ...$carry,
+                ...$item,
+            ],
+            [],
+        );
+
+        return [
+            ...$propertiesNames,
+            ...$propertiesDocComments,
+        ];
     }
 
     /**
