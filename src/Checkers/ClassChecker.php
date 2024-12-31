@@ -19,7 +19,7 @@ use Symfony\Component\Finder\SplFileInfo;
 /**
  * @internal
  */
-readonly class ClassChecker implements Checker
+final readonly class ClassChecker implements Checker
 {
     /**
      * Creates a new instance of ClassChecker.
@@ -70,49 +70,45 @@ readonly class ClassChecker implements Checker
      */
     private function getIssuesFromClass(SplFileInfo $file): array
     {
-        try {
-            $class = $this->getClassNameWithNamespace($file);
+        $class = $this->getClassNameWithNamespace($file);
 
-            if ($class === null) {
-                return [];
-            }
-
-            $reflectionClass = new ReflectionClass($class);
-
-            $namesToCheck = [
-                ...$this->getMethodNames($reflectionClass),
-                ...$this->getPropertyNames($reflectionClass),
-            ];
-
-            if ($docComment = $reflectionClass->getDocComment()) {
-                $namesToCheck = [
-                    ...$namesToCheck,
-                    ...explode(PHP_EOL, $docComment),
-                ];
-            }
-
-            if ($namesToCheck === []) {
-                return [];
-            }
-
-            $issues = [];
-
-            foreach ($namesToCheck as $name) {
-                $issues = [
-                    ...$issues,
-                    ...array_map(
-                        fn (Misspelling $misspelling): Issue => new Issue(
-                            $misspelling,
-                            $file->getRealPath(),
-                            $this->getErrorLine($file, $name),
-                        ), $this->spellchecker->check(strtolower((string) preg_replace('/(?<!^)[A-Z]/', ' $0', $name)))),
-                ];
-            }
-
-            return $issues;
-        } catch (\Throwable) {
+        if ($class === null) {
             return [];
         }
+
+        $reflectionClass = new ReflectionClass($class);
+
+        $namesToCheck = [
+            ...$this->getMethodNames($reflectionClass),
+            ...$this->getPropertyNames($reflectionClass),
+        ];
+
+        if ($docComment = $reflectionClass->getDocComment()) {
+            $namesToCheck = [
+                ...$namesToCheck,
+                ...explode(PHP_EOL, $docComment),
+            ];
+        }
+
+        if ($namesToCheck === []) {
+            return [];
+        }
+
+        $issues = [];
+
+        foreach ($namesToCheck as $name) {
+            $issues = [
+                ...$issues,
+                ...array_map(
+                    fn (Misspelling $misspelling): Issue => new Issue(
+                        $misspelling,
+                        $file->getRealPath(),
+                        $this->getErrorLine($file, $name),
+                    ), $this->spellchecker->check(strtolower((string) preg_replace('/(?<!^)[A-Z]/', ' $0', $name)))),
+            ];
+        }
+
+        return $issues;
     }
 
     /**

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Peck\Config;
 
 it('should have a default configuration', function (): void {

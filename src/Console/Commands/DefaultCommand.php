@@ -21,7 +21,7 @@ use function Termwind\renderUsing;
  * @internal
  */
 #[AsCommand(name: 'default')]
-class DefaultCommand extends Command
+final class DefaultCommand extends Command
 {
     /**
      * Executes the command.
@@ -31,7 +31,7 @@ class DefaultCommand extends Command
         $kernel = Kernel::default();
 
         $issues = $kernel->handle([
-            'directory' => $directory = self::inferProjectPath(),
+            'directory' => $directory = $this->inferProjectPath(),
         ]);
 
         $output->writeln('');
@@ -66,7 +66,24 @@ class DefaultCommand extends Command
         $this->setDescription('Checks for misspellings in the given directory.');
     }
 
-    protected function renderIssue(OutputInterface $output, Issue $issue, string $currentDirectory): void
+    /**
+     * Infer the project's base directory from the environment.
+     */
+    private function inferProjectPath(): string
+    {
+        $basePath = dirname(array_keys(ClassLoader::getRegisteredLoaders())[0]);
+
+        return match (true) {
+            isset($_ENV['APP_BASE_PATH']) => $_ENV['APP_BASE_PATH'],
+            default => match (true) {
+                is_dir($basePath.'/src') => ($basePath.'/src'),
+                is_dir($basePath.'/app') => ($basePath.'/app'),
+                default => $basePath,
+            },
+        };
+    }
+
+    private function renderIssue(OutputInterface $output, Issue $issue, string $currentDirectory): void
     {
         renderUsing($output);
 
@@ -87,22 +104,5 @@ class DefaultCommand extends Command
                 </div>
             </div>
         HTML);
-    }
-
-    /**
-     * Infer the project's base directory from the environment.
-     */
-    protected static function inferProjectPath(): string
-    {
-        $basePath = dirname(array_keys(ClassLoader::getRegisteredLoaders())[0]);
-
-        return match (true) {
-            isset($_ENV['APP_BASE_PATH']) => $_ENV['APP_BASE_PATH'],
-            default => match (true) {
-                is_dir($basePath.'/src') => ($basePath.'/src'),
-                is_dir($basePath.'/app') => ($basePath.'/app'),
-                default => $basePath,
-            },
-        };
     }
 }

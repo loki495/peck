@@ -51,8 +51,8 @@ final readonly class InMemorySpellchecker implements Spellchecker
     /**
      * Filters the given words against the whitelisted words stored in the configuration.
      *
-     * @param  array<int, \PhpSpellcheck\MisspellingInterface>  $misspellings
-     * @return array<int, \PhpSpellcheck\MisspellingInterface> $misspellings
+     * @param  array<int, MisspellingInterface>  $misspellings
+     * @return array<int, MisspellingInterface> $misspellings
      */
     private function filterWhitelistedWords(array $misspellings): array
     {

@@ -14,7 +14,7 @@ use Symfony\Component\Finder\Finder;
 /**
  * @internal
  */
-readonly class FileSystemChecker implements Checker
+final readonly class FileSystemChecker implements Checker
 {
     /**
      * Creates a new instance of FileSystemChecker.

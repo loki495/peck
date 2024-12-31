@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Peck\Checkers\FileSystemChecker;
 use Peck\Config;
 use Peck\Services\Spellcheckers\InMemorySpellchecker;

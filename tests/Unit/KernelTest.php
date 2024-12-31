@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Peck\Kernel;
 
 it('handles multiple checkers', function (): void {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Peck\Services\Spellcheckers\InMemorySpellchecker;
 
 it('does not detect issues', function (): void {

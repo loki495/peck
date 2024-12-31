@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Fixtures\ClassesToTest;
 
 /**
@@ -9,7 +11,7 @@ namespace Tests\Fixtures\ClassesToTest;
  *
  * @internal
  */
-class ClassWithTypoErrors
+final class ClassWithTypoErrors
 {
     public int $propertyWithoutTypoError = 1;
 
@@ -40,11 +42,11 @@ class ClassWithTypoErrors
 
     public function methodWithTypoErrorInParameters(string $parameterWithoutTypoError, string $parameterWithTypoErorr): string
     {
-        return 'This is a method with a typo error in parameters';
+        return $parameterWithoutTypoError.$parameterWithTypoErorr.'This is a method with a typo error in parameters';
     }
 
     public function methodWithoutTypoErrorInParameters(string $parameterWithoutTypoError): string
     {
-        return 'This is a method without a typo error in parameters';
+        return $parameterWithoutTypoError.'This is a method without a typo error in parameters';
     }
 }
