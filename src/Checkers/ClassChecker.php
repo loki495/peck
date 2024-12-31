@@ -78,33 +78,33 @@ final readonly class ClassChecker implements Checker
 
         $reflectionClass = new ReflectionClass($class);
 
-        $namesToCheck = [
+        $stringsToCheck = [
             ...$this->getMethodNames($reflectionClass),
             ...$this->getPropertyNames($reflectionClass),
         ];
 
         if ($docComment = $reflectionClass->getDocComment()) {
-            $namesToCheck = [
-                ...$namesToCheck,
+            $stringsToCheck = [
+                ...$stringsToCheck,
                 ...explode(PHP_EOL, $docComment),
             ];
         }
 
-        if ($namesToCheck === []) {
+        if ($stringsToCheck === []) {
             return [];
         }
 
         $issues = [];
 
-        foreach ($namesToCheck as $name) {
+        foreach ($stringsToCheck as $string) {
             $issues = [
                 ...$issues,
                 ...array_map(
                     fn (Misspelling $misspelling): Issue => new Issue(
                         $misspelling,
                         $file->getRealPath(),
-                        $this->getErrorLine($file, $name),
-                    ), $this->spellchecker->check(strtolower((string) preg_replace('/(?<!^)[A-Z]/', ' $0', $name)))),
+                        $this->getErrorLine($file, $string),
+                    ), $this->spellchecker->check(strtolower((string) preg_replace('/(?<!^)[A-Z]/', ' $0', $string)))),
             ];
         }
 
