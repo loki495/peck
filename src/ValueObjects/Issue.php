@@ -16,5 +16,6 @@ final readonly class Issue
         public Misspelling $misspelling,
         public string $file,
         public int $line,
+        public int $column,
     ) {}
 }

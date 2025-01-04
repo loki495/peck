@@ -7,7 +7,6 @@ namespace Peck\Checkers;
 use Peck\Config;
 use Peck\Contracts\Checker;
 use Peck\Contracts\Services\Spellchecker;
-use Peck\Support\NameParser;
 use Peck\ValueObjects\Issue;
 use Peck\ValueObjects\Misspelling;
 use ReflectionClass;
@@ -100,15 +99,23 @@ final readonly class ClassChecker implements Checker
         $issues = [];
 
         foreach ($namesToCheck as $name) {
-            $issues = [
-                ...$issues,
-                ...array_map(
-                    fn (Misspelling $misspelling): Issue => new Issue(
-                        $misspelling,
-                        $file->getRealPath(),
-                        $this->getErrorLine($file, $name),
-                    ), $this->spellchecker->check(NameParser::parse($name))),
-            ];
+            $misspellings = $this->spellchecker->check($name);
+
+            $foundInstances = $this->getErrorsLineAndColumn($file, $name);
+
+            foreach ($foundInstances as $instance) {
+                [$line, $column] = $instance;
+                $issues = [
+                    ...$issues,
+                    ...array_map(
+                        fn (Misspelling $misspelling): Issue => new Issue(
+                            $misspelling,
+                            $file->getRealPath(),
+                            $line,
+                            $column + $misspelling->offset,
+                        ), $misspellings),
+                ];
+            }
         }
 
         return $issues;
@@ -222,24 +229,32 @@ final readonly class ClassChecker implements Checker
 
     /**
      * Get the line number of the error.
+     *
+     * @return array<int, array{int, int}>
      */
-    private function getErrorLine(SplFileInfo $file, string $misspellingWord): int
+    private function getErrorsLineAndColumn(SplFileInfo $file, string $name): array
     {
         $contentsArray = explode(PHP_EOL, $file->getContents());
         $contentsArrayLines = array_map(fn ($lineNumber): int => $lineNumber + 1, array_keys($contentsArray));
 
         $lines = array_values(array_filter(
             array_map(
-                fn (string $line, int $lineNumber): ?int => str_contains($line, $misspellingWord) ? $lineNumber : null,
+                function (string $line, int $lineNumber) use ($name): ?array {
+                    $offset = strpos($line, $name);
+
+                    return $offset !== false
+                        ? [$lineNumber, $offset]
+                        : null;
+                },
                 $contentsArray,
                 $contentsArrayLines,
             ),
         ));
 
         if ($lines === []) {
-            return 0;
+            return [];
         }
 
-        return $lines[0];
+        return $lines;
     }
 }

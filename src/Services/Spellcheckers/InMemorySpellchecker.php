@@ -7,6 +7,7 @@ namespace Peck\Services\Spellcheckers;
 use Peck\Config;
 use Peck\Contracts\Services\Spellchecker;
 use Peck\Plugins\Cache;
+use Peck\Support\NameParser;
 use Peck\ValueObjects\Misspelling;
 use PhpSpellcheck\MisspellingInterface;
 use PhpSpellcheck\Spellchecker\Aspell;
@@ -43,16 +44,20 @@ final readonly class InMemorySpellchecker implements Spellchecker
      */
     public function check(string $text): array
     {
-        $cacheKey = md5($text);
+        $parsedText = NameParser::parse($text);
+        $isParsedDifferent = $parsedText !== $text;
+
+        $cacheKey = md5($parsedText);
         /**
          * @var array<int, MisspellingInterface>
          */
-        $misspellings = $this->cache->has($cacheKey) ? $this->cache->get($cacheKey) : $this->getMisspellings($text);
+        $misspellings = $this->cache->has($cacheKey) ? $this->cache->get($cacheKey) : $this->getMisspellings($parsedText);
         $misspellings = $this->filterWhitelistedWords($misspellings);
 
         return array_map(fn (MisspellingInterface $misspelling): Misspelling => new Misspelling(
             $misspelling->getWord(),
             array_slice($misspelling->getSuggestions(), 0, 4),
+            (int) $misspelling->getOffset() - ($isParsedDifferent ? substr_count($parsedText, ' ', 0, $misspelling->getOffset()) : 0),
         ), $misspellings);
     }
 
