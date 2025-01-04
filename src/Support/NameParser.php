@@ -21,9 +21,6 @@ final readonly class NameParser
         // Add spaces before capital letters (for camel and pascal case)
         $input = (string) preg_replace('/([a-z])([A-Z])/', '$1 $2', $input);
 
-        // Lowercase the input
-        $input = strtolower($input);
-
         return $input;
     }
 }

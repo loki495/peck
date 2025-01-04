@@ -95,6 +95,7 @@ final class CheckCommand extends Command
 
         $file = str_replace($currentDirectory, '.', $issue->file);
         $lineInfo = ($issue->line !== 0) ? ":{$issue->line}" : '';
+        $lineInfo .= ($issue->column !== 0) ? ":{$issue->column}" : '';
         $suggestions = implode(', ', $issue->misspelling->suggestions);
 
         render(<<<HTML

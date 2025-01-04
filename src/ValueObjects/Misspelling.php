@@ -17,5 +17,6 @@ final readonly class Misspelling
     public function __construct(
         public string $word,
         public array $suggestions,
+        public int $offset,
     ) {}
 }

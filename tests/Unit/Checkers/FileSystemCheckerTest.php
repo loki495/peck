@@ -33,36 +33,40 @@ it('detects issues in the given directory', function (): void {
     expect($issues)->toHaveCount(4)
         ->and($issues[0]->file)->toEndWith('tests/Fixtures/FolderWithTypoos')
         ->and($issues[0]->line)->toBe(0)
-        ->and($issues[0]->misspelling->word)->toBe('typoos')
+        ->and($issues[0]->column)->toBe(47)
+        ->and($issues[0]->misspelling->word)->toBe('Typoos')
         ->and($issues[0]->misspelling->suggestions)->toBe([
-            'typos',
-            'typo\'s',
-            'types',
-            'type\'s',
+            'Typos',
+            'Typo\'s',
+            'Types',
+            'Type\'s',
         ])->and($issues[1]->file)->toEndWith('tests/Fixtures/FolderWithTypoos/FileThatShouldBeIgnroed.php')
         ->and($issues[1]->line)->toBe(0)
-        ->and($issues[1]->misspelling->word)->toBe('ignroed')
+        ->and($issues[1]->column)->toBe(74)
+        ->and($issues[1]->misspelling->word)->toBe('Ignroed')
         ->and($issues[1]->misspelling->suggestions)->toBe([
-            'ignored',
-            'ignores',
-            'ignore',
-            'inroad',
+            'Ignored',
+            'Ignores',
+            'Ignore',
+            'Inroad',
         ])->and($issues[2]->file)->toEndWith('tests/Fixtures/FolderWithTypoos/FileWithTppyo.php')
         ->and($issues[2]->line)->toBe(0)
-        ->and($issues[2]->misspelling->word)->toBe('tppyo')
+        ->and($issues[2]->column)->toBe(66)
+        ->and($issues[2]->misspelling->word)->toBe('Tppyo')
         ->and($issues[2]->misspelling->suggestions)->toBe([
-            'typo',
+            'Typo',
             'Tokyo',
-            'typos',
-            'topi',
+            'Typos',
+            'Topi',
         ])->and($issues[3]->file)->toEndWith('tests/Fixtures/FolderWithTypoos/FolderThatShouldBeIgnored/FileThatShoudBeIgnoredBecauseItsInsideWhitelistedFolder.php')
         ->and($issues[3]->line)->toBe(0)
-        ->and($issues[3]->misspelling->word)->toBe('shoud')
+        ->and($issues[3]->column)->toBe(92)
+        ->and($issues[3]->misspelling->word)->toBe('Shoud')
         ->and($issues[3]->misspelling->suggestions)->toBe([
-            'should',
-            'shroud',
-            'shod',
-            'shout',
+            'Should',
+            'Shroud',
+            'Shod',
+            'Shout',
         ]);
 });
 
@@ -86,29 +90,32 @@ it('detects issues in the given directory, but ignores the whitelisted words', f
     expect($issues)->toHaveCount(3)
         ->and($issues[0]->file)->toEndWith('tests/Fixtures/FolderWithTypoos')
         ->and($issues[0]->line)->toBe(0)
-        ->and($issues[0]->misspelling->word)->toBe('typoos')
+        ->and($issues[0]->column)->toBe(47)
+        ->and($issues[0]->misspelling->word)->toBe('Typoos')
         ->and($issues[0]->misspelling->suggestions)->toBe([
-            'typos',
-            'typo\'s',
-            'types',
-            'type\'s',
+            'Typos',
+            'Typo\'s',
+            'Types',
+            'Type\'s',
         ])->and($issues[1]->file)->toEndWith('tests/Fixtures/FolderWithTypoos/FileWithTppyo.php')
         ->and($issues[1]->line)->toBe(0)
-        ->and($issues[1]->misspelling->word)->toBe('tppyo')
+        ->and($issues[1]->column)->toBe(66)
+        ->and($issues[1]->misspelling->word)->toBe('Tppyo')
         ->and($issues[1]->misspelling->suggestions)->toBe([
-            'typo',
+            'Typo',
             'Tokyo',
-            'typos',
-            'topi',
+            'Typos',
+            'Topi',
         ])
         ->and($issues[2]->file)->toEndWith('tests/Fixtures/FolderWithTypoos/FolderThatShouldBeIgnored/FileThatShoudBeIgnoredBecauseItsInsideWhitelistedFolder.php')
         ->and($issues[2]->line)->toBe(0)
-        ->and($issues[2]->misspelling->word)->toBe('shoud')
+        ->and($issues[2]->column)->toBe(92)
+        ->and($issues[2]->misspelling->word)->toBe('Shoud')
         ->and($issues[2]->misspelling->suggestions)->toBe([
-            'should',
-            'shroud',
-            'shod',
-            'shout',
+            'Should',
+            'Shroud',
+            'Shod',
+            'Shout',
         ]);
 });
 
@@ -127,27 +134,30 @@ it('detects issues in the given directory, but ignores the whitelisted directori
     expect($issues)->toHaveCount(3)
         ->and($issues[0]->file)->toEndWith('tests/Fixtures/FolderWithTypoos')
         ->and($issues[0]->line)->toBe(0)
-        ->and($issues[0]->misspelling->word)->toBe('typoos')
+        ->and($issues[0]->column)->toBe(47)
+        ->and($issues[0]->misspelling->word)->toBe('Typoos')
         ->and($issues[0]->misspelling->suggestions)->toBe([
-            'typos',
-            'typo\'s',
-            'types',
-            'type\'s',
+            'Typos',
+            'Typo\'s',
+            'Types',
+            'Type\'s',
         ])->and($issues[1]->file)->toEndWith('tests/Fixtures/FolderWithTypoos/FileThatShouldBeIgnroed.php')
         ->and($issues[1]->line)->toBe(0)
-        ->and($issues[1]->misspelling->word)->toBe('ignroed')
+        ->and($issues[1]->column)->toBe(74)
+        ->and($issues[1]->misspelling->word)->toBe('Ignroed')
         ->and($issues[1]->misspelling->suggestions)->toBe([
-            'ignored',
-            'ignores',
-            'ignore',
-            'inroad',
+            'Ignored',
+            'Ignores',
+            'Ignore',
+            'Inroad',
         ])->and($issues[2]->file)->toEndWith('tests/Fixtures/FolderWithTypoos/FileWithTppyo.php')
         ->and($issues[2]->line)->toBe(0)
-        ->and($issues[2]->misspelling->word)->toBe('tppyo')
+        ->and($issues[2]->column)->toBe(66)
+        ->and($issues[2]->misspelling->word)->toBe('Tppyo')
         ->and($issues[2]->misspelling->suggestions)->toBe([
-            'typo',
+            'Typo',
             'Tokyo',
-            'typos',
-            'topi',
+            'Typos',
+            'Topi',
         ]);
 });
