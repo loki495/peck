@@ -43,7 +43,10 @@ final readonly class FileSystemChecker implements Checker
         $issues = [];
 
         foreach ($filesOrDirectories as $fileOrDirectory) {
+
             $name = $fileOrDirectory->getFilenameWithoutExtension();
+
+            $misspelling = $this->spellchecker->check($name);
 
             $misspelling = $this->spellchecker->check($name);
 
