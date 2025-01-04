@@ -57,7 +57,12 @@ final class CheckCommand extends Command
         }
 
         foreach ($issues as $issue) {
-            $this->renderIssue($output, $issue, $directory);
+            if ($issue->line === 0) {
+                $this->renderPathIssue($output, $issue, $directory);
+
+                continue;
+            }
+            $this->renderFileIssue($output, $issue, $directory);
         }
 
         return Command::FAILURE;
@@ -89,20 +94,64 @@ final class CheckCommand extends Command
         };
     }
 
-    private function renderIssue(OutputInterface $output, Issue $issue, string $currentDirectory): void
+    private function renderFileIssue(OutputInterface $output, Issue $issue, string $currentDirectory): void
     {
         renderUsing($output);
 
-        $file = str_replace($currentDirectory, '.', $issue->file);
-        $lineInfo = ($issue->line !== 0) ? ":{$issue->line}" : '';
-        $lineInfo .= ($issue->column !== 0) ? ":{$issue->column}" : '';
+        $relativePath = str_replace($currentDirectory, '.', $issue->file);
+
+        $lineAndColumnInfo = ($issue->line !== 0) ? ":{$issue->line}" : '';
+        $lineAndColumnInfo .= ($issue->column !== 0) ? ":{$issue->column}" : '';
+
+        $lines = file($issue->file);
+        $lineContent = $lines[$issue->line - 1] ?? '';
+
+        $alignSpacer = str_repeat(' ', 6);
+        $spacer = str_repeat('-', $issue->column);
+
         $suggestions = implode(', ', $issue->misspelling->suggestions);
 
         render(<<<HTML
             <div class="mx-2 mb-1">
                 <div class="space-x-1">
                     <span class="bg-red text-white px-1 font-bold">ISSUE</span>
-                    <span>Misspelling in <strong><a href="{$issue->file}{$lineInfo}">{$file}{$lineInfo}</a></strong>: '<strong>{$issue->misspelling->word}</strong>'</span>
+                    <span>Misspelling in <strong><a href="{$issue->file}{$lineAndColumnInfo}">{$relativePath}{$lineAndColumnInfo}</a></strong>: '<strong>{$issue->misspelling->word}</strong>'</span>
+                    <code start-line="{$issue->line}">{$lineContent}</code>
+                    <pre class="text-red-500 font-bold">{$alignSpacer}{$spacer}^</pre>
+                </div>
+
+                <div class="space-x-1 text-gray-700">
+                    <span>Did you mean:</span>
+                    <span class="font-bold">{$suggestions}</span>
+                </div>
+            </div>
+        HTML);
+    }
+
+    private function renderPathIssue(OutputInterface $output, Issue $issue, string $currentDirectory): void
+    {
+        renderUsing($output);
+
+        // termwind "<code>" adds some spaces to the left, plus the space-x-1 of the wrapper div
+        $spacer = str_repeat('-', $issue->column);
+
+        $capitalized = strtolower($issue->file[$issue->column]) !== $issue->file[$issue->column];
+
+        $suggestions = $issue->misspelling->suggestions;
+        if ($capitalized) {
+            $suggestions = array_map('ucfirst', $suggestions);
+        }
+        $suggestions = implode(', ', $suggestions);
+
+        $relativePath = str_replace($currentDirectory, '.', $issue->file);
+
+        render(<<<HTML
+            <div class="mx-2 mb-2">
+                <div class="space-x-1">
+                    <span class="bg-red text-white px-1 font-bold">ISSUE</span>
+                    <span>Misspelling in <strong><a href="{$issue->file}">{$relativePath}</a></strong>: '<strong>{$issue->misspelling->word}</strong>'</span>
+                    <pre class="text-blue-300 font-bold">{$issue->file}</pre>
+                    <pre class="text-red-500 font-bold">{$spacer}^</pre>
                 </div>
 
                 <div class="space-x-1 text-gray-700">
