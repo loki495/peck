@@ -8,6 +8,8 @@ use Composer\Autoload\ClassLoader;
 use Peck\Config;
 use Peck\Kernel;
 use Peck\ValueObjects\Issue;
+use Peck\Fixers\SourceCodeFixer;
+use Peck\Fixers\PathFixer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -75,10 +77,12 @@ final class CheckCommand extends Command
             return Command::SUCCESS;
         }
 
+        $fix = $input->getOption('fix');
+
         foreach ($issues as $issue) {
             match ($issue->line > 0) {
-                true => $this->renderLineIssue($issue),
-                default => $this->renderLineLessIssue($issue),
+                true => $this->renderLineIssue($issue, $fix),
+                default => $this->renderLineLessIssue($issue, $fix),
             };
         }
 
@@ -142,7 +146,9 @@ final class CheckCommand extends Command
                 'a',
                 InputOption::VALUE_NONE,
                 'Ignore all words that are not considered misspellings.',
-            );
+            )
+            //->addOption('interactive-fix', 't', InputOption::VALUE_NONE, 'Prompt the user to fix the misspellings.')
+            ->addOption('fix', 'f', InputOption::VALUE_NONE, 'Automatically fix the misspellings with the first suggestion');
     }
 
     /**
@@ -179,7 +185,7 @@ final class CheckCommand extends Command
     /**
      * Render the issue with the line.
      */
-    private function renderLineIssue(Issue $issue): void
+    private function renderLineIssue(Issue $issue, bool $fix): void
     {
         $relativePath = str_replace((string) getcwd(), '.', $issue->file);
 
@@ -199,21 +205,29 @@ final class CheckCommand extends Command
         );
 
         render(<<<HTML
-            <div class="mx-2 mb-1">
+            <div class="mx-2">
                 <div class="space-x-1">
                     <span class="bg-red text-white px-1 font-bold">Misspelling</span>
                     <span><strong><a href="{$issue->file}{$lineInfo}">{$relativePath}{$lineInfo}</a></strong>: '<strong>{$issue->misspelling->word}</strong>'</span>
                     <code start-line="{$issue->line}">{$lineContent}</code>
                     <pre class="text-red-500 font-bold">{$alignSpacer}{$spacer}^</pre>
                 </div>
-
-                <div class="space-x-1 text-gray-700">
-                    <span>Did you mean:</span>
-                    <span class="font-bold">{$suggestions}</span>
-                </div>
             </div>
         HTML
         );
+
+        match ($fix) {
+            true => SourceCodeFixer::fix($issue),
+            default => render(<<<HTML
+                <div class="mx-2 mb-2">
+                    <div class="space-x-1 text-gray-700">
+                        <span>Did you mean:</span>
+                        <span class="font-bold">{$suggestions}</span>
+                    </div>
+                </div>
+                HTML
+            )
+        };
     }
 
     /*
@@ -259,7 +273,7 @@ final class CheckCommand extends Command
     /**
      * Render the issue without the line.
      */
-    private function renderLineLessIssue(Issue $issue): void
+    private function renderLineLessIssue(Issue $issue, bool $fix): void
     {
         $relativePath = str_replace((string) getcwd(), '.', $issue->file);
 
@@ -280,13 +294,20 @@ final class CheckCommand extends Command
                     <pre class="text-blue-300 font-bold">{$relativePath}</pre>
                     <pre class="text-red-500 font-bold">{$spacer}^</pre>
                 </div>
-
-                <div class="space-x-1 text-gray-700">
-                    <span>Did you mean:</span>
-                    <span class="font-bold">{$suggestions}</span>
+            HTML
+        );
+        match ($fix) {
+            true => PathFixer::fix($issue),
+            default => render(<<<HTML
+                <div class="mx-2 mb-2">
+                    <div class="space-x-1 text-gray-700">
+                        <span>Did you mean:</span>
+                        <span class="font-bold">{$suggestions}</span>
+                    </div>
                 </div>
-            </div>
-        HTML);
+                HTML
+            )
+        };
     }
 
     /**

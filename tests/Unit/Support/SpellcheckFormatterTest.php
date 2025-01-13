@@ -45,3 +45,26 @@ it('can handle abbreviations', function (): void {
 
     expect($result)->toBeString()->toBe('http controller');
 });
+it('it fixes capitalization for all caps', function (): void {
+    $result = SpellcheckFormatter::fixCapitalization('public SOME_RNDOM_CONSTANT', 'rndom', 12, 'random');
+
+    expect($result)->toBeString()->toBe('RANDOM');
+});
+
+it('it fixes capitalization for only first letter', function (): void {
+    $result = SpellcheckFormatter::fixCapitalization('public function responseFormaterAndOutput()', 'formater', 24, 'formatter');
+
+    expect($result)->toBeString()->toBe('Formatter');
+});
+
+it('it fixes capitalization for all lowercase', function (): void {
+    $result = SpellcheckFormatter::fixCapitalization('public function responsFormaterAndOutput()', 'respons', 16, 'Response');
+
+    expect($result)->toBeString()->toBe('response');
+});
+
+it('it detects wrong occurrence because of capitalization', function (): void {
+    $result = SpellcheckFormatter::fixCapitalization('public $thisHasNoTypoOrError', 'typoo', 18, 'typo');
+
+    expect($result)->toBeNull();
+});
